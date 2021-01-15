@@ -178,7 +178,7 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="btn_replace">
-                    <property name="label" translatable="yes">ersetzen</property>
+                    <property name="label" translatable="yes">replace</property>
                     <property name="name">replacebutton</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -193,7 +193,7 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="btn_replace_all">
-                    <property name="label" translatable="yes">alle ersetzen</property>
+                    <property name="label" translatable="yes">replace all</property>
                     <property name="name">replaceallbutton</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
