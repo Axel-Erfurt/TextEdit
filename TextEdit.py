@@ -60,16 +60,13 @@ class MyWindow(Gtk.Window):
         self.btn_open.set_relief(Gtk.ReliefStyle.NONE)
         
         self.editor = builder.get_object("editor")
-        #self.editor.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0.96, 0.96, 0.96, 1))
         self.editor.set_accepts_tab(True)
         tabs = Pango.TabArray(1, True)
         tabs.set_tab(0, Pango.TabAlign.LEFT, 16)
         self.editor.set_tabs(tabs)
         
-        #self.buffer = builder.get_object("buffer")
         self.buffer = undobuffer.UndoableBuffer()
         self.buffer.connect('changed', self.is_modified)
-        #self.editor.enable_undo(True)
         self.editor.set_buffer(self.buffer)
         
         self.findbox = builder.get_object("findbox")
@@ -186,21 +183,16 @@ class MyWindow(Gtk.Window):
             self.buffer.set_text(text)
 
     ### find all occurences in editor and select
-    def on_search_changed(self, widget):
-        if len(self.searchbar.get_text()) < 1:
-            start = self.buffer.get_start_iter()
-            end = self.buffer.get_end_iter()
-            self.buffer.remove_all_tags(start, end)
-        else:
-            start = self.buffer.get_start_iter()
-            end = self.buffer.get_end_iter()
-            self.buffer.remove_all_tags(start, end)
-            self.find_text()
+    def on_search_changed(self, widget):      
+        start = self.buffer.get_start_iter()
+        end = self.buffer.get_end_iter()
+        self.buffer.remove_all_tags(start, end)
+        self.find_text()
         
     def find_text(self, *args):
         search_text = self.searchbar.get_text()
         cursor_mark = self.buffer.get_insert()
-        start = self.buffer.get_iter_at_mark(cursor_mark)
+        start = self.buffer.get_start_iter() ###get_iter_at_mark(cursor_mark)
         if start.get_offset() == self.buffer.get_char_count():
             start = self.buffer.get_start_iter()
 
@@ -347,3 +339,4 @@ class MyWindow(Gtk.Window):
 if __name__ == "__main__":
     w = MyWindow()
     w.main(sys.argv)
+    
