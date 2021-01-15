@@ -1,6 +1,9 @@
 # TextEdit
 python Gtk3 Texteditor
 
+- find and replace
+- undo / redo
+
 ## Requirements
 
 - python3
