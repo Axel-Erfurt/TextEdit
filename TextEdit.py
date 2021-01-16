@@ -184,7 +184,7 @@ class MyWindow(Gtk.Window):
             self.buffer.set_text(text)
 
     ### find all occurences in editor and select
-    def on_search_changed(self, widget):      
+    def on_search_changed(self, widget):   
         start = self.buffer.get_start_iter()
         end = self.buffer.get_end_iter()
         self.buffer.remove_all_tags(start, end)
@@ -192,12 +192,13 @@ class MyWindow(Gtk.Window):
         
     def find_text(self, *args):
         search_text = self.searchbar.get_text()
-        cursor_mark = self.buffer.get_insert()
-        start = self.buffer.get_start_iter() ###get_iter_at_mark(cursor_mark)
-        if start.get_offset() == self.buffer.get_char_count():
-            start = self.buffer.get_start_iter()
+        if not search_text == "":
+            cursor_mark = self.buffer.get_insert()
+            start = self.buffer.get_start_iter() ###get_iter_at_mark(cursor_mark)
+            if start.get_offset() == self.buffer.get_char_count():
+                start = self.buffer.get_start_iter()
 
-        self.search_and_mark(search_text, start)
+            self.search_and_mark(search_text, start)
 
     ### mark matches
     def search_and_mark(self, text, start):
