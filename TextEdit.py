@@ -13,6 +13,7 @@ gi.require_version("Gdk", "3.0")
 gi.require_version('Keybinder', '3.0')
 from gi.repository import Gtk, Gdk, Keybinder, Pango
 import sys
+from os import path
 import warnings
 import undobuffer
 
@@ -239,8 +240,12 @@ class MyWindow(Gtk.Window):
              "Save", Gtk.ResponseType.OK)
         dlg.set_do_overwrite_confirmation (True)     
         dlg.add_filter(self.file_filter)
-        
-        dlg.set_current_name(self.current_filename)
+
+        if self.current_filename == "":
+            dlg.set_current_name("new.txt")
+        else:
+            dlg.set_current_folder(path.dirname(self.current_file))
+            dlg.set_current_name(self.current_filename)
         response = dlg.run()
 
         if response == Gtk.ResponseType.OK:
@@ -259,6 +264,7 @@ class MyWindow(Gtk.Window):
                 f.close()
                 self.status_label.set_text(f"'{myfile}' saved")
                 self.current_file = myfile
+                self.current_filename = myfile.rpartition("/")[2]
                 self.is_changed = False   
                 
     ### save current file            
@@ -271,6 +277,7 @@ class MyWindow(Gtk.Window):
                 f.close()
                 self.status_label.set_text(f"'{myfile}' saved")
                 self.current_file = myfile
+                self.current_filename = myfile.rpartition("/")[2]
                 self.is_changed = False 
                 print("modified", self.is_changed)
         else:
@@ -330,6 +337,7 @@ class MyWindow(Gtk.Window):
                 self.buffer.set_text(data)
                 self.editor.set_buffer(self.buffer)
                 self.current_file = myfile
+                self.current_filename = myfile.rpartition("/")[2]
                 f.close()
                 self.is_changed = False
                 print("modified", self.is_changed)
