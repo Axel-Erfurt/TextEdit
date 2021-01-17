@@ -23,26 +23,23 @@ headerbar.titlebar {
     color: #555753;
 }
 #openbutton:hover {
-    background-color: #bfddf6;
+    background-image: linear-gradient(0deg, rgba(114,159,207,1) 0%, rgba(191,221,246,1) 100%);
 }
 #savebutton:hover {
-    background-color: #bfddf6;
+    background-image: linear-gradient(0deg, rgba(114,159,207,1) 0%, rgba(191,221,246,1) 100%);
 }
 #saveasbutton:hover {
-    background-color: #bfddf6;
+    background-image: linear-gradient(0deg, rgba(114,159,207,1) 0%, rgba(191,221,246,1) 100%);
 }
 #showfindbutton:hover {
-    background-color: #bfddf6;
+    background-image: linear-gradient(0deg, rgba(114,159,207,1) 0%, rgba(191,221,246,1) 100%);
 }
 #newbutton:hover {
-    background-color: #bfddf6;
+    background-image: linear-gradient(0deg, rgba(114,159,207,1) 0%, rgba(191,221,246,1) 100%);
 }
 #replacebutton:hover {
-    background-color: #bfddf6;
+    background-image: linear-gradient(0deg, rgba(114,159,207,1) 0%, rgba(191,221,246,1) 100%);
 }
 #replaceallbutton:hover {
-    background-color: #bfddf6;
-}
-button:hover {
-    background-color: #bfddf6;
+    background-image: linear-gradient(0deg, rgba(114,159,207,1) 0%, rgba(191,221,246,1) 100%);
 }
