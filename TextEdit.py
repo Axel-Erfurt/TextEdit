@@ -103,11 +103,15 @@ class MyWindow(Gtk.Window):
         
         self.status_label = builder.get_object("status_label")
         
-        self.file_filter = Gtk.FileFilter()
-        self.file_filter.set_name("Text Files")
+        self.file_filter_text = Gtk.FileFilter()
+        self.file_filter_text.set_name("Text Files")
         pattern = ["*.txt", "*.py", "*.c", "*.h", "*.cpp", "*.csv"]
         for p in pattern:
-            self.file_filter.add_pattern(p)
+            self.file_filter_text.add_pattern(p)
+            
+        self.file_filter_all = Gtk.FileFilter()
+        self.file_filter_all.set_name("All Files")
+        self.file_filter_all.add_pattern("*.*")     
         
         self.win.connect("delete-event", self.on_close)
         self.win.resize(800, 700)
@@ -286,7 +290,8 @@ class MyWindow(Gtk.Window):
         dlg = Gtk.FileChooserDialog(title="Please choose a file", parent=None, action = 0)
         dlg.add_buttons("Cancel", Gtk.ResponseType.CANCEL,
              "Save", Gtk.ResponseType.OK)
-        dlg.add_filter(self.file_filter)
+        dlg.add_filter(self.file_filter_text)
+        dlg.add_filter(self.file_filter_all)
         dlg.set_current_folder(self.current_folder)
         response = dlg.run()
 
@@ -322,8 +327,8 @@ class MyWindow(Gtk.Window):
         dlg.add_buttons("Cancel", Gtk.ResponseType.CANCEL,
              "Save", Gtk.ResponseType.OK)
         dlg.set_do_overwrite_confirmation (True)     
-        dlg.add_filter(self.file_filter)
-
+        dlg.add_filter(self.file_filter_text)
+        dlg.add_filter(self.file_filter_all)
         if self.current_filename == "":
             dlg.set_current_name("new.txt")
         else:
