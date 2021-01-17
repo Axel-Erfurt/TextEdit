@@ -11,7 +11,7 @@ import gi
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 gi.require_version('Keybinder', '3.0')
-from gi.repository import Gtk, Gdk, Keybinder, Pango
+from gi.repository import Gtk, Gdk, Keybinder, Pango, GLib
 import sys
 from os import path
 from urllib.request import url2pathname
@@ -29,6 +29,7 @@ class MyWindow(Gtk.Window):
         
         self.current_file = ""
         self.current_filename = ""
+        self.current_folder = GLib.get_user_special_dir(GLib.USER_DIRECTORY_DOCUMENTS) ###path.expanduser("~")
         self.is_changed = False
         builder = Gtk.Builder()
         builder.add_from_file("ui.glade")
@@ -169,6 +170,7 @@ class MyWindow(Gtk.Window):
             self.editor.set_buffer(self.buffer)
             self.current_file = myfile
             self.current_filename = myfile.rpartition("/")[2]
+            self.current_folder = path.dirname(myfile)
             f.close()
             self.headerbar.set_subtitle(myfile)
             self.status_label.set_text(f"'{myfile}' loaded")
@@ -212,7 +214,7 @@ class MyWindow(Gtk.Window):
             self.buffer.set_text(text)
 
     ### find all occurences in editor and select
-    def on_search_changed(self, widget):   
+    def on_search_changed(self, widget):
         start = self.buffer.get_start_iter()
         end = self.buffer.get_end_iter()
         self.buffer.remove_all_tags(start, end)
@@ -240,10 +242,15 @@ class MyWindow(Gtk.Window):
 
     ### show / hide findbox
     def toggle_findbox(self, *args):
+        if self.buffer.get_has_selection():
+            a,b  = self.buffer.get_selection_bounds()
+            mark = self.buffer.get_text(a, b, True)
+            self.searchbar.set_text(mark)
         if self.findbox.is_visible():
             self.findbox.set_visible(False)
         else:
             self.findbox.set_visible(True)
+            self.searchbar.grab_focus()
             
     ### set modified   
     def is_modified(self, *args):
@@ -280,7 +287,7 @@ class MyWindow(Gtk.Window):
         dlg.add_buttons("Cancel", Gtk.ResponseType.CANCEL,
              "Save", Gtk.ResponseType.OK)
         dlg.add_filter(self.file_filter)
-
+        dlg.set_current_folder(self.current_folder)
         response = dlg.run()
 
         if response == Gtk.ResponseType.OK:
@@ -300,6 +307,7 @@ class MyWindow(Gtk.Window):
                 self.editor.set_buffer(self.buffer)
                 self.current_file = myfile
                 self.current_filename = myfile.rpartition("/")[2]
+                self.current_folder = path.dirname(myfile)
                 f.close()
                 self.headerbar.set_subtitle(myfile)
                 self.status_label.set_text(f"'{myfile}' loaded")
@@ -340,6 +348,7 @@ class MyWindow(Gtk.Window):
                 self.status_label.set_text(f"'{myfile}' saved")
                 self.current_file = myfile
                 self.current_filename = myfile.rpartition("/")[2]
+                self.current_folder = path.dirname(myfile)
                 self.is_changed = False
                 self.headerbar.set_title("TextEdit")
                 
@@ -354,6 +363,7 @@ class MyWindow(Gtk.Window):
                 self.status_label.set_text(f"'{myfile}' saved")
                 self.current_file = myfile
                 self.current_filename = myfile.rpartition("/")[2]
+                self.current_folder = path.dirname(myfile)
                 self.is_changed = False 
                 self.headerbar.set_title("TextEdit")
         else:
