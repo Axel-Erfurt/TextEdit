@@ -267,7 +267,8 @@ class MyWindow(Gtk.Window):
             
     ### open file    
     def on_open(self, *args):       
-        if not self.maybe_saved():
+        if self.is_changed:
+            self.maybe_saved()
             self.on_open_file()
         else:
             self.on_open_file()
