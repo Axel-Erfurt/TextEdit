@@ -289,7 +289,7 @@ class MyWindow(Gtk.Window):
         myfile = ""
         dlg = Gtk.FileChooserDialog(title="Please choose a file", parent=None, action = 0)
         dlg.add_buttons("Cancel", Gtk.ResponseType.CANCEL,
-             "Save", Gtk.ResponseType.OK)
+             "Open", Gtk.ResponseType.OK)
         dlg.add_filter(self.file_filter_text)
         dlg.add_filter(self.file_filter_all)
         dlg.set_current_folder(self.current_folder)
