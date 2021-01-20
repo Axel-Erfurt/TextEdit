@@ -29,7 +29,7 @@ class MyWindow(Gtk.Window):
         
         self.current_file = ""
         self.current_filename = ""
-        self.current_folder = GLib.get_user_special_dir(GLib.USER_DIRECTORY_DOCUMENTS) ###path.expanduser("~")
+        self.current_folder = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS) ###path.expanduser("~")
         self.is_changed = False
         builder = Gtk.Builder()
         builder.add_from_file("ui.glade")
@@ -83,6 +83,7 @@ class MyWindow(Gtk.Window):
         
         self.searchbar = builder.get_object("searchbar")
         self.searchbar.connect("search_changed", self.on_search_changed)
+        #self.searchbar.connect("activate", self.on_search_changed)
         
         self.replacebar = builder.get_object("replacebar")
         
@@ -105,7 +106,7 @@ class MyWindow(Gtk.Window):
         
         self.file_filter_text = Gtk.FileFilter()
         self.file_filter_text.set_name("Text Files")
-        pattern = ["*.txt", "*.py", "*.c", "*.h", "*.cpp", "*.csv"]
+        pattern = ["*.txt", "*.py", "*.c", "*.h", "*.cpp", "*.csv", "*.m3*", "*.vala", "*.tsv"]
         for p in pattern:
             self.file_filter_text.add_pattern(p)
             
@@ -143,10 +144,11 @@ class MyWindow(Gtk.Window):
                 self.editor.set_buffer(self.buffer)
                 self.current_file = myfile
                 f.close()
-                self.is_changed = False
-                print("modified", self.is_changed)
                 self.headerbar.set_subtitle(myfile)
                 self.status_label.set_text(f"'{myfile}' loaded")
+                self.headerbar.set_title("TextEdit")
+                self.editor.grab_focus()
+                self.is_changed = False
         else:
             self.status_label.set_text("Welcome to TextEdit")
         self.editor.grab_focus()
@@ -250,6 +252,7 @@ class MyWindow(Gtk.Window):
             a,b  = self.buffer.get_selection_bounds()
             mark = self.buffer.get_text(a, b, True)
             self.searchbar.set_text(mark)
+            #self.searchbar.activate()
         if self.findbox.is_visible():
             self.findbox.set_visible(False)
         else:
@@ -263,17 +266,22 @@ class MyWindow(Gtk.Window):
     
     ### new file clear editor
     def on_new_file(self, *args):
-        if not self.maybe_saved():
+        if self.is_changed:
+            self.maybe_saved()
             self.buffer.set_text("")
             self.editor.set_buffer(self.buffer)
             self.current_file = ""
+            self.current_filename = ""
             self.headerbar.set_title("TextEdit") 
+            self.headerbar.set_subtitle("New")
             self.is_changed = False
         else:
             self.buffer.set_text("")
             self.editor.set_buffer(self.buffer)
             self.current_file = ""
-            self.headerbar.set_title("TextEdit")    
+            self.current_filename = ""
+            self.headerbar.set_title("TextEdit")
+            self.headerbar.set_subtitle("New")    
             self.is_changed = False
             
     ### open file    
@@ -281,8 +289,10 @@ class MyWindow(Gtk.Window):
         if self.is_changed:
             self.maybe_saved()
             self.on_open_file()
+            self.is_changed = False
         else:
             self.on_open_file()
+            self.is_changed = False
                 
     def on_open_file(self, *args):
         data = ""
@@ -356,6 +366,7 @@ class MyWindow(Gtk.Window):
                 self.current_folder = path.dirname(myfile)
                 self.is_changed = False
                 self.headerbar.set_title("TextEdit")
+                self.headerbar.set_subtitle(myfile)
                 
     ### save current file            
     def save_file(self, *args):
@@ -371,6 +382,7 @@ class MyWindow(Gtk.Window):
                 self.current_folder = path.dirname(myfile)
                 self.is_changed = False 
                 self.headerbar.set_title("TextEdit")
+                self.headerbar.set_subtitle(myfile)
         else:
             self.on_save_file()
         return True
