@@ -3,8 +3,6 @@
 
 ### created in January 2021 by Axel Schneider
 ### https://github.com/Axel-Erfurt/
-### Credits: Florian Heinle for undo / redo
-### https://github.com/fheinle/undobuffer
 
 import gi
 
