@@ -2,6 +2,7 @@
 <!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
+  <requires lib="gtksourceview" version="4.0"/>
   <object class="GtkTextBuffer" id="buffer"/>
   <object class="GtkFileFilter" id="file_filter">
     <patterns>
@@ -217,27 +218,27 @@
           </packing>
         </child>
         <child>
-          <object class="GtkScrolledWindow">
+          <object class="GtkSourceView" id="editor">
+            <property name="name">myeditor</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="shadow_type">in</property>
-            <child>
-              <object class="GtkTextView" id="editor">
-                <property name="name">myeditor</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="wrap_mode">word</property>
-                <property name="left_margin">5</property>
-                <property name="right_margin">5</property>
-                <property name="top_margin">5</property>
-                <property name="bottom_margin">5</property>
-                <property name="buffer">buffer</property>
-                <property name="monospace">True</property>
-              </object>
-            </child>
+            <property name="vexpand">True</property>
+            <property name="wrap_mode">word</property>
+            <property name="left_margin">2</property>
+            <property name="right_margin">2</property>
+            <property name="top_margin">2</property>
+            <property name="bottom_margin">2</property>
+            <property name="show_line_numbers">True</property>
+            <property name="tab_width">4</property>
+            <property name="auto_indent">True</property>
+            <property name="insert_spaces_instead_of_tabs">True</property>
+            <property name="highlight_current_line">True</property>
+            <style>
+              <class name="myeditor"/>
+            </style>
           </object>
           <packing>
-            <property name="expand">True</property>
+            <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
