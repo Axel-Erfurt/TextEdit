@@ -3,8 +3,6 @@
 
 ### created in January 2021 by Axel Schneider
 ### https://github.com/Axel-Erfurt/
-### Credits: Florian Heinle for undo / redo
-### https://github.com/fheinle/undobuffer
 
 import gi
 
@@ -71,12 +69,21 @@ class MyWindow(Gtk.Window):
         self.editor = builder.get_object("editor")
 
         self.editor.drag_dest_set_target_list(dnd_list)
-        #self.editor.set_show_line_marks(True)
         self.editor.connect("drag-data-received", self.on_drag_data_received)
+        
+        self.editor.connect("key_press_event", self.editor_key_press)  
         
         self.lang_manager = GtkSource.LanguageManager()
         self.buffer = self.editor.get_buffer()
         self.buffer.connect('changed', self.is_modified)
+        
+        # Settings for SourceView Find
+        self.searchbar = builder.get_object("searchbar")
+        self.settings = GtkSource.SearchSettings()
+        self.searchbar.bind_property("text", self.settings, "search-text")
+        self.settings.set_search_text("initial highlight")
+        self.settings.set_wrap_around(True)
+        self.search_context = GtkSource.SearchContext.new(self.buffer, self.settings)
         
         self.stylemanager = GtkSource.StyleSchemeManager()
         self.style = {1: "kate", 2: "builder", 3: "builder-dark", 4: "classic", 5: "tango", 6: "styles", 
@@ -88,9 +95,6 @@ class MyWindow(Gtk.Window):
         self.style_box.connect("changed", self.on_style_changed)
         
         self.findbox = builder.get_object("findbox")
-        
-        self.searchbar = builder.get_object("searchbar")
-        self.searchbar.connect("search_changed", self.on_search_changed)
         
         self.replacebar = builder.get_object("replacebar")
         
@@ -127,18 +131,6 @@ class MyWindow(Gtk.Window):
         self.win.show_all()
         ### focus on editor
         self.findbox.set_visible(False)
-        
-        ### shortcuts
-        Keybinder.init()
-        Keybinder.set_use_cooked_accelerators(False)
-        Keybinder.bind("<Ctrl>F", self.toggle_findbox)
-        Keybinder.bind("<Ctrl>S", self.save_file)
-        Keybinder.bind("<Ctrl>O", self.on_open)
-        Keybinder.bind("<Ctrl>N", self.on_new_file)
-        Keybinder.bind("<Ctrl><Shift>S", self.on_save_file)
-        
-        ### tags for search color
-        self.tag_found = self.buffer.create_tag("found", background="#edd400")
 
         ### load sys.argv file
         if len(sys.argv) > 1:
@@ -150,6 +142,27 @@ class MyWindow(Gtk.Window):
         self.is_changed = False
         Gtk.main() 
         
+    def editor_key_press(self, widget, event):
+        if (event.keyval == Gdk.keyval_from_name("n") and
+            event.state == Gdk.ModifierType.CONTROL_MASK):
+            self.on_new_file()
+        if (event.keyval == Gdk.keyval_from_name("o") and
+            event.state == Gdk.ModifierType.CONTROL_MASK):
+            self.on_open_file()
+        if (event.keyval == Gdk.keyval_from_name("s") and
+            event.state == Gdk.ModifierType.CONTROL_MASK):
+            self.save_file()
+        if (event.keyval == Gdk.keyval_from_name("s") and
+            event.state == Gdk.ModifierType.CONTROL_MASK and
+            Gdk.ModifierType.SHIFT_MASK):
+            self.on_save_file()
+        if (event.keyval == Gdk.keyval_from_name("f") and
+            event.state == Gdk.ModifierType.CONTROL_MASK):
+            self.toggle_findbox()
+        if (event.keyval == Gdk.keyval_from_name("q") and
+            event.state == Gdk.ModifierType.CONTROL_MASK):
+            self.on_close()
+            
     def on_style_changed(self, *args):
         index = self.style_box.get_active()
         model = self.style_box.get_model()
@@ -185,6 +198,7 @@ class MyWindow(Gtk.Window):
             if extension == "csv":
                 extension = "txt"
             self.buffer.set_language(self.lang_manager.get_language(extension))
+            self.language = self.buffer.get_language()
             
             self.editor.set_buffer(self.buffer)
             self.current_file = myfile
@@ -232,45 +246,30 @@ class MyWindow(Gtk.Window):
             text = text.replace(search_text, replace_text)
             self.buffer.set_text(text)
 
-    ### find all occurences in editor and select
-    def on_search_changed(self, widget):
-        start = self.buffer.get_start_iter()
-        end = self.buffer.get_end_iter()
-        self.buffer.remove_all_tags(start, end)
-        self.find_text()
-        
-    def find_text(self, *args):
-        search_text = self.searchbar.get_text()
-        if not search_text == "":
-            #cursor_mark = self.buffer.get_insert()
-            start = self.buffer.get_start_iter() ###get_iter_at_mark(cursor_mark)
-            if start.get_offset() == self.buffer.get_char_count():
-                start = self.buffer.get_start_iter()
+    def find_text(self, start_offset=1):
+        buf = self.buffer
+        insert = buf.get_iter_at_mark(buf.get_insert())
+        start, end = buf.get_bounds()
+        insert.forward_chars(start_offset)
+        match, start_iter, end_iter, wrapped = self.search_context.forward2(insert)
 
-            self.search_and_mark(search_text, start)
-
-    ### mark matches
-    def search_and_mark(self, text, start):
-        end = self.buffer.get_end_iter()
-        match = start.forward_search(text, 0, end)
-
-        if match is not None:
-            match_start, match_end = match
-            self.buffer.apply_tag(self.tag_found, match_start, match_end)
-            self.search_and_mark(text, match_end)
+        if match:
+            buf.place_cursor(start_iter)
+            buf.move_mark(buf.get_selection_bound(), end_iter)
+            self.view.scroll_to_mark(buf.get_insert(), 0.25, True, 0.5, 0.5)
+            return True
+        else:
+            buf.place_cursor(buf.get_iter_at_mark(buf.get_insert()))
 
     ### show / hide findbox
     def toggle_findbox(self, *args):
-        if self.buffer.get_has_selection():
-            a,b  = self.buffer.get_selection_bounds()
-            mark = self.buffer.get_text(a, b, True)
-            self.searchbar.set_text(mark)
-            #self.searchbar.activate()
-        if self.findbox.is_visible():
-            self.findbox.set_visible(False)
-        else:
+        if not self.findbox.is_visible():
             self.findbox.set_visible(True)
-            self.searchbar.grab_focus()
+            self.searchbar.grab_focus()            
+            if self.buffer.get_has_selection():
+                a,b  = self.buffer.get_selection_bounds()
+                mark = self.buffer.get_text(a, b, True)
+                self.searchbar.set_text(mark)
             
     ### set modified   
     def is_modified(self, *args):
