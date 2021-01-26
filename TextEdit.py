@@ -143,17 +143,7 @@ class MyWindow(Gtk.Window):
         ### load sys.argv file
         if len(sys.argv) > 1:
             myfile = sys.argv[1]
-            with open(myfile, 'r') as f:
-                data = f.read()
-                self.buffer.set_text(data)
-                self.editor.set_buffer(self.buffer)
-                self.current_file = myfile
-                f.close()
-                self.headerbar.set_subtitle(myfile)
-                self.status_label.set_text(f"'{myfile}' loaded")
-                self.headerbar.set_title("TextEdit")
-                self.editor.grab_focus()
-                self.is_changed = False
+            self.open_file(myfile)
         else:
             self.status_label.set_text("Welcome to TextEdit")
         self.editor.grab_focus()
@@ -186,6 +176,16 @@ class MyWindow(Gtk.Window):
         with open(myfile, 'r') as f:
             data = f.read()
             self.buffer.set_text(data)
+            
+            extension = myfile.rpartition(".")[2]
+            if extension == "py":
+                extension = "python"
+            if extension == "qml":
+                extension = "css"
+            if extension == "csv":
+                extension = "txt"
+            self.buffer.set_language(self.lang_manager.get_language(extension))
+            
             self.editor.set_buffer(self.buffer)
             self.current_file = myfile
             self.current_filename = myfile.rpartition("/")[2]
@@ -327,29 +327,7 @@ class MyWindow(Gtk.Window):
         
         
         if not myfile == "":
-            extension = myfile.rpartition(".")[2]
-            if extension == "py":
-                extension = "python"
-            if extension == "qml":
-                extension = "css"
-            if extension == "csv":
-                extension = "txt"
-            self.buffer.set_language(self.lang_manager.get_language(extension))
-            self.buffer.set_text(data)
-            print("loading:", myfile)
-            with open(myfile, 'r') as f:
-                data = f.read()
-                self.buffer.set_text(data)
-                self.editor.set_buffer(self.buffer)
-                self.current_file = myfile
-                self.current_filename = myfile.rpartition("/")[2]
-                self.current_folder = path.dirname(myfile)
-                f.close()
-                self.headerbar.set_subtitle(myfile)
-                self.status_label.set_text(f"'{myfile}' loaded")
-                self.headerbar.set_title("TextEdit")
-                self.editor.grab_focus()
-                self.is_changed = False
+            self.open_file(myfile)
 
     ### file save as ...
     def on_save_file(self, *args):
