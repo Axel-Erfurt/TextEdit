@@ -11,12 +11,14 @@ import gi
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 gi.require_version('Keybinder', '3.0')
-from gi.repository import Gtk, Gdk, Keybinder, Pango, GLib
+gi.require_version('GtkSource', '3.0')
+from gi.repository import Gtk, Gdk, Keybinder, GLib, GtkSource, GObject
 import sys
 from os import path
 from urllib.request import url2pathname
 import warnings
-import undobuffer
+
+
 dnd_list = [Gtk.TargetEntry.new("text/uri-list", 0, 80)]
 
 warnings.filterwarnings("ignore")
@@ -32,6 +34,7 @@ class MyWindow(Gtk.Window):
         self.current_folder = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS) ###path.expanduser("~")
         self.is_changed = False
         builder = Gtk.Builder()
+        GObject.type_register(GtkSource.View)
         builder.add_from_file("ui.glade")
 
         screen = Gdk.Screen.get_default()    
@@ -66,24 +69,18 @@ class MyWindow(Gtk.Window):
         
         ### textview
         self.editor = builder.get_object("editor")
-        self.editor.set_accepts_tab(True)
-        tabs = Pango.TabArray(1, True)
-        tabs.set_tab(0, Pango.TabAlign.LEFT, 16)
-        self.editor.set_tabs(tabs)
 
         self.editor.drag_dest_set_target_list(dnd_list)
 
         self.editor.connect("drag-data-received", self.on_drag_data_received)
         
-        self.buffer = undobuffer.UndoableBuffer()
+        self.buffer = self.editor.get_buffer()
         self.buffer.connect('changed', self.is_modified)
-        self.editor.set_buffer(self.buffer)
         
         self.findbox = builder.get_object("findbox")
         
         self.searchbar = builder.get_object("searchbar")
         self.searchbar.connect("search_changed", self.on_search_changed)
-        #self.searchbar.connect("activate", self.on_search_changed)
         
         self.replacebar = builder.get_object("replacebar")
         
@@ -129,8 +126,6 @@ class MyWindow(Gtk.Window):
         Keybinder.bind("<Ctrl>O", self.on_open)
         Keybinder.bind("<Ctrl>N", self.on_new_file)
         Keybinder.bind("<Ctrl><Shift>S", self.on_save_file)
-        Keybinder.bind("<Ctrl>Z", self.buffer.undo)
-        Keybinder.bind("<Ctrl><Shift>Z", self.buffer.redo)
         
         ### tags for search color
         self.tag_found = self.buffer.create_tag("found", background="#edd400")
@@ -229,7 +224,7 @@ class MyWindow(Gtk.Window):
     def find_text(self, *args):
         search_text = self.searchbar.get_text()
         if not search_text == "":
-            cursor_mark = self.buffer.get_insert()
+            #cursor_mark = self.buffer.get_insert()
             start = self.buffer.get_start_iter() ###get_iter_at_mark(cursor_mark)
             if start.get_offset() == self.buffer.get_char_count():
                 start = self.buffer.get_start_iter()
@@ -350,7 +345,7 @@ class MyWindow(Gtk.Window):
             myfile = dlg.get_filename()
             
         else:
-            infile = ("")
+            myfile = ("")
             
         dlg.destroy()
         if not myfile == "":
