@@ -3,6 +3,8 @@
 
 ### created in January 2021 by Axel Schneider
 ### https://github.com/Axel-Erfurt/
+### Credits: Florian Heinle for undo / redo
+### https://github.com/fheinle/undobuffer
 
 import gi
 
@@ -69,11 +71,21 @@ class MyWindow(Gtk.Window):
         self.editor = builder.get_object("editor")
 
         self.editor.drag_dest_set_target_list(dnd_list)
-
+        #self.editor.set_show_line_marks(True)
         self.editor.connect("drag-data-received", self.on_drag_data_received)
         
+        self.lang_manager = GtkSource.LanguageManager()
         self.buffer = self.editor.get_buffer()
         self.buffer.connect('changed', self.is_modified)
+        
+        self.stylemanager = GtkSource.StyleSchemeManager()
+        self.style = {1: "kate", 2: "builder", 3: "builder-dark", 4: "classic", 5: "tango", 6: "styles", 
+                7: "cobalt", 8: "solarized-light", 9: "solarized-dark", 10: "classic"}
+        scheme = self.stylemanager.get_scheme(self.style[1]) 
+        self.buffer.set_style_scheme(scheme)
+        
+        self.style_box = builder.get_object("style_box")
+        self.style_box.connect("changed", self.on_style_changed)
         
         self.findbox = builder.get_object("findbox")
         
@@ -101,7 +113,7 @@ class MyWindow(Gtk.Window):
         
         self.file_filter_text = Gtk.FileFilter()
         self.file_filter_text.set_name("Text Files")
-        pattern = ["*.txt", "*.py", "*.c", "*.h", "*.cpp", "*.csv", "*.m3*", "*.vala", "*.tsv"]
+        pattern = ["*.txt", "*.py", "*.c", "*.h", "*.cpp", "*.csv", "*.m3*", "*.vala", "*.tsv", "*.css"]
         for p in pattern:
             self.file_filter_text.add_pattern(p)
             
@@ -147,6 +159,14 @@ class MyWindow(Gtk.Window):
         self.editor.grab_focus()
         self.is_changed = False
         Gtk.main() 
+        
+    def on_style_changed(self, *args):
+        index = self.style_box.get_active()
+        model = self.style_box.get_model()
+        item = model[index]
+        print(item[0])
+        scheme = self.stylemanager.get_scheme(self.style[item[0]]) 
+        self.buffer.set_style_scheme(scheme)
         
     ### drop file
     def on_drag_data_received(self, widget, context, x, y, selection, target_type, timestamp):
@@ -307,6 +327,14 @@ class MyWindow(Gtk.Window):
         
         
         if not myfile == "":
+            extension = myfile.rpartition(".")[2]
+            if extension == "py":
+                extension = "python"
+            if extension == "qml":
+                extension = "css"
+            if extension == "csv":
+                extension = "txt"
+            self.buffer.set_language(self.lang_manager.get_language(extension))
             self.buffer.set_text(data)
             print("loading:", myfile)
             with open(myfile, 'r') as f:
