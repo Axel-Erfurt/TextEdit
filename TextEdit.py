@@ -249,6 +249,7 @@ class MyWindow(Gtk.Window):
     def find_text(self, start_offset=1):
         if not self.findbox.is_visible():
             self.findbox.set_visible(True)
+        self.searchbar.set_text("")
         self.searchbar.grab_focus()            
         if self.buffer.get_has_selection():
             a,b  = self.buffer.get_selection_bounds()
