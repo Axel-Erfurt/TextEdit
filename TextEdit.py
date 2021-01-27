@@ -10,7 +10,7 @@ gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 gi.require_version('Keybinder', '3.0')
 gi.require_version('GtkSource', '3.0')
-from gi.repository import Gtk, Gdk, Keybinder, GLib, GtkSource, GObject
+from gi.repository import Gtk, Gdk, GLib, GtkSource, GObject
 import sys
 from os import path
 from urllib.request import url2pathname
@@ -158,7 +158,7 @@ class MyWindow(Gtk.Window):
             self.on_save_file()
         if (event.keyval == Gdk.keyval_from_name("f") and
             event.state == Gdk.ModifierType.CONTROL_MASK):
-            self.toggle_findbox()
+            self.find_text()
         if (event.keyval == Gdk.keyval_from_name("q") and
             event.state == Gdk.ModifierType.CONTROL_MASK):
             self.on_close()
@@ -247,6 +247,13 @@ class MyWindow(Gtk.Window):
             self.buffer.set_text(text)
 
     def find_text(self, start_offset=1):
+        if not self.findbox.is_visible():
+            self.findbox.set_visible(True)
+        self.searchbar.grab_focus()            
+        if self.buffer.get_has_selection():
+            a,b  = self.buffer.get_selection_bounds()
+            mark = self.buffer.get_text(a, b, True)
+            self.searchbar.set_text(mark)
         buf = self.buffer
         insert = buf.get_iter_at_mark(buf.get_insert())
         start, end = buf.get_bounds()
@@ -265,11 +272,8 @@ class MyWindow(Gtk.Window):
     def toggle_findbox(self, *args):
         if not self.findbox.is_visible():
             self.findbox.set_visible(True)
-            self.searchbar.grab_focus()            
-            if self.buffer.get_has_selection():
-                a,b  = self.buffer.get_selection_bounds()
-                mark = self.buffer.get_text(a, b, True)
-                self.searchbar.set_text(mark)
+        else:
+            self.findbox.set_visible(False)
             
     ### set modified   
     def is_modified(self, *args):
@@ -307,7 +311,6 @@ class MyWindow(Gtk.Window):
             self.is_changed = False
                 
     def on_open_file(self, *args):
-        data = ""
         myfile = ""
         dlg = Gtk.FileChooserDialog(title="Please choose a file", parent=None, action = 0)
         dlg.add_buttons("Cancel", Gtk.ResponseType.CANCEL,
