@@ -69,12 +69,13 @@ class MyWindow(Gtk.Window):
         self.editor = builder.get_object("editor")
 
         self.editor.drag_dest_set_target_list(dnd_list)
-        self.editor.connect("drag-data-received", self.on_drag_data_received)
+        self.editor.connect("drag_data_received", self.on_drag_data_received)
         
         self.editor.connect("key_press_event", self.editor_key_press)  
         
         self.lang_manager = GtkSource.LanguageManager()
-        self.buffer = self.editor.get_buffer()
+        self.buffer = GtkSource.Buffer()
+        self.editor.set_buffer(self.buffer)
         self.buffer.connect('changed', self.is_modified)
         
         # Settings for SourceView Find
@@ -183,6 +184,9 @@ class MyWindow(Gtk.Window):
                 self.open_file(myfile)
             else:
                 self.open_file(myfile)
+        else:
+            txt = selection.get_text()
+            self.buffer.insert_at_cursor(txt)
                 
                 
     def open_file(self, myfile, *args):
