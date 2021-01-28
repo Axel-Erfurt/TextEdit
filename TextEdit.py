@@ -67,7 +67,6 @@ class MyWindow(Gtk.Window):
         
         ### textview
         self.editor = builder.get_object("editor")
-
         self.editor.drag_dest_set_target_list(dnd_list)
         self.editor.connect("drag_data_received", self.on_drag_data_received)
         
@@ -77,6 +76,12 @@ class MyWindow(Gtk.Window):
         self.buffer = GtkSource.Buffer()
         self.editor.set_buffer(self.buffer)
         self.buffer.connect('changed', self.is_modified)
+        
+        # completion
+        self.text_completion = self.editor.get_completion()
+        self.view_provider = GtkSource.CompletionWords.new('main')
+        self.view_provider.register(self.buffer)
+        self.text_completion.add_provider(self.view_provider) 
         
         # Settings for SourceView Find
         self.searchbar = builder.get_object("searchbar")
@@ -153,10 +158,10 @@ class MyWindow(Gtk.Window):
         if (event.keyval == Gdk.keyval_from_name("s") and
             event.state == Gdk.ModifierType.CONTROL_MASK):
             self.save_file()
-        if (event.keyval == Gdk.keyval_from_name("s") and
-            event.state == Gdk.ModifierType.CONTROL_MASK and
-            Gdk.ModifierType.SHIFT_MASK):
-            self.on_save_file()
+        #if (event.keyval == Gdk.keyval_from_name("s") and
+        #    event.state == Gdk.ModifierType.CONTROL_MASK and
+        #    Gdk.ModifierType.SHIFT_MASK):
+        #    self.on_save_file()
         if (event.keyval == Gdk.keyval_from_name("f") and
             event.state == Gdk.ModifierType.CONTROL_MASK):
             self.find_text()
@@ -268,7 +273,7 @@ class MyWindow(Gtk.Window):
         if match:
             buf.place_cursor(start_iter)
             buf.move_mark(buf.get_selection_bound(), end_iter)
-            self.view.scroll_to_mark(buf.get_insert(), 0.25, True, 0.5, 0.5)
+            self.editor.scroll_to_mark(buf.get_insert(), 0.25, True, 0.5, 0.5)
             return True
         else:
             buf.place_cursor(buf.get_iter_at_mark(buf.get_insert()))
