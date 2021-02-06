@@ -87,10 +87,11 @@ class MyWindow(Gtk.Window):
         self.searchbar = builder.get_object("searchbar")
         self.settings = GtkSource.SearchSettings()
         self.searchbar.bind_property("text", self.settings, "search-text")
+        self.searchbar.connect("activate", self.find_next_match_from_entry)
         self.settings.set_search_text("initial highlight")
         self.settings.set_wrap_around(True)
         self.search_context = GtkSource.SearchContext.new(self.buffer, self.settings)
-        
+        self.search_mark = Gtk.TextMark()
         self.stylemanager = GtkSource.StyleSchemeManager()
         self.style = {1: "kate", 2: "builder", 3: "builder-dark", 4: "classic", 5: "tango", 6: "styles", 
                 7: "cobalt", 8: "solarized-light", 9: "solarized-dark", 10: "classic"}
@@ -277,6 +278,20 @@ class MyWindow(Gtk.Window):
             return True
         else:
             buf.place_cursor(buf.get_iter_at_mark(buf.get_insert()))
+            
+    # find from searchbar 
+    def find_next_match_from_entry(self, *args):
+        search_str =  self.searchbar.get_text()
+        self.settings.set_search_text(search_str)
+        self.search_mark = self.buffer.get_insert()
+        search_iter = self.buffer.get_iter_at_mark (self.search_mark)
+        search_iter.forward_char()
+        result = self.search_context.forward(search_iter)
+        valid, start_iter, end_iter = result[0], result[1], result[2]
+        if valid == True:
+            self.buffer.move_mark(self.search_mark, end_iter)
+            self.buffer.select_range(start_iter, end_iter)
+            self.editor.scroll_to_iter(end_iter, 0.1, True, 0.0, 0.1)
 
     ### show / hide findbox
     def toggle_findbox(self, *args):
