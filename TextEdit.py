@@ -189,11 +189,7 @@ class MyWindow(Gtk.Window):
                 self.maybe_saved()
                 self.open_file(myfile)
             else:
-                self.open_file(myfile)
-        else:
-            txt = selection.get_text()
-            self.buffer.insert_at_cursor(txt)
-                
+                self.open_file(myfile)            
                 
     def open_file(self, myfile, *args):
         with open(myfile, 'r') as f:
