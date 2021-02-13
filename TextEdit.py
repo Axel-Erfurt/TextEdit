@@ -18,6 +18,7 @@ import warnings
 
 
 dnd_list = [Gtk.TargetEntry.new("text/uri-list", 0, 80)]
+dnd_text = Gtk.TargetEntry.new("text/plain", 0, 4294967293)
 
 warnings.filterwarnings("ignore")
 
@@ -29,7 +30,7 @@ class MyWindow(Gtk.Window):
         
         self.current_file = ""
         self.current_filename = ""
-        self.current_folder = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS) ###path.expanduser("~")
+        self.current_folder = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS) 
         self.is_changed = False
         builder = Gtk.Builder()
         GObject.type_register(GtkSource.View)
@@ -92,14 +93,33 @@ class MyWindow(Gtk.Window):
         self.settings.set_wrap_around(True)
         self.search_context = GtkSource.SearchContext.new(self.buffer, self.settings)
         self.search_mark = Gtk.TextMark()
+        
+        
         self.stylemanager = GtkSource.StyleSchemeManager()
-        self.style = {1: "kate", 2: "builder", 3: "builder-dark", 4: "classic", 5: "tango", 6: "styles", 
-                7: "cobalt", 8: "solarized-light", 9: "solarized-dark", 10: "classic"}
-        scheme = self.stylemanager.get_scheme(self.style[1]) 
+        self.style = self.stylemanager.get_scheme_ids()
+        scheme = self.stylemanager.get_scheme("kate") 
         self.buffer.set_style_scheme(scheme)
         
-        self.style_box = builder.get_object("style_box")
-        self.style_box.connect("changed", self.on_style_changed)
+        self.headerbar = builder.get_object("headerbar")
+        
+        ############ styles selector #################
+        btn_style_up = Gtk.Image.new_from_icon_name("down", 4)
+        btn_style_up.set_name("stylesbutton")
+        self.btn_styles = Gtk.MenuButton(label="Styles")
+        self.btn_styles.set_tooltip_text("set Style Theme")
+        self.btn_styles.set_image(btn_style_up)
+        self.btn_styles.set_image_position(0)
+        self.btn_styles.set_relief(Gtk.ReliefStyle.NONE)
+        self.btn_styles.set_name("stylesbutton")       
+        self.styles_menu = Gtk.Menu()
+        self.btn_styles.set_popup(self.styles_menu) 
+        self.headerbar.pack_end(self.btn_styles) 
+        
+        for style in self.style:
+            menuitem = Gtk.MenuItem(style)
+            menuitem.connect("activate", self.on_styles_activated)
+            self.styles_menu.append(menuitem)
+        self.styles_menu.show_all()
         
         self.findbox = builder.get_object("findbox")
         
@@ -117,8 +137,6 @@ class MyWindow(Gtk.Window):
         self.btn_replace_all = builder.get_object("btn_replace_all")
         self.btn_replace_all.connect('clicked', self.replace_all)
         self.btn_replace_all.set_relief(Gtk.ReliefStyle.NONE)
-        
-        self.headerbar = builder.get_object("headerbar")
         
         self.status_label = builder.get_object("status_label")
         
@@ -170,16 +188,16 @@ class MyWindow(Gtk.Window):
             event.state == Gdk.ModifierType.CONTROL_MASK):
             self.on_close()
             
-    def on_style_changed(self, *args):
-        index = self.style_box.get_active()
-        model = self.style_box.get_model()
-        item = model[index]
-        print(item[0])
-        scheme = self.stylemanager.get_scheme(self.style[item[0]]) 
+    # styles menu
+    def on_styles_activated(self, menuitem, *args):
+        style = menuitem.get_label()
+        scheme = self.stylemanager.get_scheme(style) 
         self.buffer.set_style_scheme(scheme)
+        print(self.buffer.get_style_scheme().get_id())
         
     ### drop file
     def on_drag_data_received(self, widget, context, x, y, selection, target_type, timestamp):
+#        print(target_type)
         myfile = ""
         if target_type == 80:
             uri = str(selection.get_data().decode().rstrip())
@@ -189,7 +207,11 @@ class MyWindow(Gtk.Window):
                 self.maybe_saved()
                 self.open_file(myfile)
             else:
-                self.open_file(myfile)            
+                self.open_file(myfile)
+#        elif target_type == 4294967293:
+#            txt = selection.get_text()
+#            self.buffer.insert_at_cursor(txt)
+                
                 
     def open_file(self, myfile, *args):
         with open(myfile, 'r') as f:
