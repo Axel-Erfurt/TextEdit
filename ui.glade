@@ -13,44 +13,6 @@
       <pattern>*.txt *.py *.c *.h *.cpp</pattern>
     </patterns>
   </object>
-  <object class="GtkListStore" id="liststore1">
-    <columns>
-      <!-- column-name Index -->
-      <column type="gint"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0">1</col>
-      </row>
-      <row>
-        <col id="0">2</col>
-      </row>
-      <row>
-        <col id="0">3</col>
-      </row>
-      <row>
-        <col id="0">4</col>
-      </row>
-      <row>
-        <col id="0">5</col>
-      </row>
-      <row>
-        <col id="0">6</col>
-      </row>
-      <row>
-        <col id="0">7</col>
-      </row>
-      <row>
-        <col id="0">8</col>
-      </row>
-      <row>
-        <col id="0">9</col>
-      </row>
-      <row>
-        <col id="0">10</col>
-      </row>
-    </data>
-  </object>
   <object class="GtkImage" id="question_icon">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -168,34 +130,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkComboBox" id="style_box">
-            <property name="name">Style</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="tooltip_text">Styles
-
-1: kate
-2: builder
-3: builder-dark
-4: classic
-5: tango
-6: styles
-7: cobalt
-8: solarized-light
-9: solarized-dark
-10: classic</property>
-            <property name="model">liststore1</property>
-            <property name="active">0</property>
-            <child>
-              <object class="GtkCellRendererText" id="style"/>
-              <attributes>
-                <attribute name="text">0</attribute>
-              </attributes>
-            </child>
-          </object>
-          <packing>
-            <property name="position">5</property>
-          </packing>
+          <placeholder/>
         </child>
       </object>
     </child>
