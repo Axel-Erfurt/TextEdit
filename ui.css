@@ -22,24 +22,13 @@ headerbar.titlebar {
     border: 0px;
     color: #555753;
 }
-#openbutton:hover {
-    background-image: linear-gradient(0deg, rgba(114,159,207,1) 0%, rgba(191,221,246,1) 100%);
-}
-#savebutton:hover {
-    background-image: linear-gradient(0deg, rgba(114,159,207,1) 0%, rgba(191,221,246,1) 100%);
-}
-#saveasbutton:hover {
-    background-image: linear-gradient(0deg, rgba(114,159,207,1) 0%, rgba(191,221,246,1) 100%);
-}
-#showfindbutton:hover {
-    background-image: linear-gradient(0deg, rgba(114,159,207,1) 0%, rgba(191,221,246,1) 100%);
-}
-#newbutton:hover {
-    background-image: linear-gradient(0deg, rgba(114,159,207,1) 0%, rgba(191,221,246,1) 100%);
-}
-#replacebutton:hover {
-    background-image: linear-gradient(0deg, rgba(114,159,207,1) 0%, rgba(191,221,246,1) 100%);
-}
-#replaceallbutton:hover {
+#openbutton:hover,
+#savebutton:hover,
+#saveasbutton:hover,
+#showfindbutton:hover ,
+#newbutton:hover,
+#replacebutton:hover,
+#replaceallbutton:hover,
+#stylesbutton:hover {
     background-image: linear-gradient(0deg, rgba(114,159,207,1) 0%, rgba(191,221,246,1) 100%);
 }
